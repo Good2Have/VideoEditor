@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E925AAFE1A27116C00D53B1A /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E925AAFD1A27116C00D53B1A /* audio.mp3 */; };
+		E925AB011A27191D00D53B1A /* ISAudioVolumePoupView.m in Sources */ = {isa = PBXBuildFile; fileRef = E925AB001A27191D00D53B1A /* ISAudioVolumePoupView.m */; };
 		E9AD138D1A22D68F00E44B4B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD138C1A22D68F00E44B4B /* main.m */; };
 		E9AD13901A22D68F00E44B4B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD138F1A22D68F00E44B4B /* AppDelegate.m */; };
 		E9AD13981A22D68F00E44B4B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E9AD13971A22D68F00E44B4B /* Images.xcassets */; };
@@ -108,6 +110,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E925AAFD1A27116C00D53B1A /* audio.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = audio.mp3; sourceTree = "<group>"; };
+		E925AAFF1A27191D00D53B1A /* ISAudioVolumePoupView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISAudioVolumePoupView.h; sourceTree = "<group>"; };
+		E925AB001A27191D00D53B1A /* ISAudioVolumePoupView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISAudioVolumePoupView.m; sourceTree = "<group>"; };
 		E9AD13871A22D68F00E44B4B /* InstaShot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstaShot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E9AD138B1A22D68F00E44B4B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E9AD138C1A22D68F00E44B4B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -347,6 +352,8 @@
 		E9AD13B41A22D7C700E44B4B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E925AAFF1A27191D00D53B1A /* ISAudioVolumePoupView.h */,
+				E925AB001A27191D00D53B1A /* ISAudioVolumePoupView.m */,
 				E9AD14501A230FCF00E44B4B /* ISMainToolbar.h */,
 				E9AD14511A230FCF00E44B4B /* ISMainToolbar.m */,
 				E9AD14561A2311D900E44B4B /* ISConfirmToolbar.h */,
@@ -372,6 +379,7 @@
 		E9AD13BD1A22D93100E44B4B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E925AAFD1A27116C00D53B1A /* audio.mp3 */,
 				E9AD13BE1A22D93100E44B4B /* drawable-xhdpi */,
 				E9AD13FA1A22D93100E44B4B /* slider-metal-track.png */,
 				E9AD13FB1A22D93100E44B4B /* slider-metal-track@2x.png */,
@@ -579,6 +587,7 @@
 				E9AD143C1A22D93100E44B4B /* slider-metal-trackBackground@2x.png in Resources */,
 				E9AD14341A22D93100E44B4B /* splite.png in Resources */,
 				E9AD142C1A22D93100E44B4B /* icon_trim.png in Resources */,
+				E925AAFE1A27116C00D53B1A /* audio.mp3 in Resources */,
 				E9AD13B91A22D80A00E44B4B /* ISMainViewController.xib in Resources */,
 				E9AD140A1A22D93100E44B4B /* color.png in Resources */,
 				E9AD14301A22D93100E44B4B /* pic_index.png in Resources */,
@@ -633,6 +642,7 @@
 				E9AD13901A22D68F00E44B4B /* AppDelegate.m in Sources */,
 				E9AD14621A23386000E44B4B /* ISColorPicker.m in Sources */,
 				E9AD14791A2347C700E44B4B /* ISRotateCommand.m in Sources */,
+				E925AB011A27191D00D53B1A /* ISAudioVolumePoupView.m in Sources */,
 				E9AD14581A2311D900E44B4B /* ISConfirmToolbar.m in Sources */,
 				E9AD14681A233C7300E44B4B /* ISVideo.m in Sources */,
 				E9AD145F1A23157400E44B4B /* ISVideoTrimToolbar.m in Sources */,

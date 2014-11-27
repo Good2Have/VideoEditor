@@ -22,6 +22,9 @@
 - (UIColor *)videoBgColor;
 - (float)videoStartTime;
 - (float)videoEndTime;
+- (NSURL *)audioURL;
+- (float)audioStartTime;
+- (float)audioEndTime;
 
 - (void)setVideoDuration:(float)duration;
 - (void)setVideoFitType:(VideoFitType)fitType;
@@ -31,6 +34,9 @@
 - (void)setVideoBgColor:(UIColor *)color;
 - (void)setVideoStartTime:(float)startTime;
 - (void)setVideoEndTime:(float)endTime;
+- (void)setAudioURL:(NSURL *)audioURL;
+- (void)setAudioStartTime:(float)startTime;
+- (void)setAudioEndTime:(float)endTime;
 
 - (void)reset;
 

@@ -18,11 +18,11 @@
 @property (strong, nonatomic) UIButton *changeBgBtn;
 @property (strong, nonatomic) UIButton *rotateBtn;
 @property (strong, nonatomic) UIButton *flipBtn;
-@property (nonatomic, unsafe_unretained) id<ISMainToolbarDelegate> delegate;;
+@property (nonatomic, unsafe_unretained) id<ISMainToolbarDelegate> delegate;
 
 @end
 
 @protocol ISMainToolbarDelegate <NSObject>
 @optional
 - (void)mainToolbar:(ISMainToolbar *)toolbar clickedButtonAtIndex:(NSInteger)buttonIndex;
-@end
+@end    

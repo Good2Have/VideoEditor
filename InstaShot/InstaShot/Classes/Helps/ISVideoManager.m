@@ -72,6 +72,21 @@
     return self.video.endTime;
 }
 
+- (NSURL *)audioURL
+{
+    return self.video.audioURL;
+}
+
+- (float)audioStartTime
+{
+    return self.video.audioStartTime;
+}
+
+- (float)audioEndTime
+{
+    return self.video.audioEndTime;
+}
+
 - (void)setVideoDuration:(float)duration
 {
     self.video.duration = duration;
@@ -109,6 +124,21 @@
 - (void)setVideoEndTime:(float)endTime
 {
     self.video.endTime = endTime;
+}
+
+- (void)setAudioURL:(NSURL *)audioURL
+{
+    self.video.audioURL = audioURL;
+}
+
+- (void)setAudioStartTime:(float)startTime
+{
+    self.video.audioStartTime = startTime;
+}
+
+- (void)setAudioEndTime:(float)endTime
+{
+    self.video.audioEndTime = endTime;
 }
 
 - (void)reset

@@ -11,10 +11,11 @@
 #import "ISVideoFitToolbar.h"
 #import "ISVideoTrimToolbar.h"
 #import "ISColorPicker.h"
+#import "ISAudioVolumePoupView.h"
 
 #define ISVIDEO_PLAYBACK_VIEW_BORDER_WIDTH_PER   10
 
-@interface ISVideoEditViewController ()<UIGestureRecognizerDelegate,ISMainToolbarDelegate,ISVideoTrimToolbarDelegate,ISColorPickerDelegate,ISVideoFitToolbarDelegate,UIActionSheetDelegate>
+@interface ISVideoEditViewController ()<UIGestureRecognizerDelegate,ISMainToolbarDelegate,ISVideoTrimToolbarDelegate,ISColorPickerDelegate,ISVideoFitToolbarDelegate,UIActionSheetDelegate,ISAudioVolumePoupViewDelegate>
 {
     UIPanGestureRecognizer *panGestureRecognizer;
     UITapGestureRecognizer *tapGestureRecognizer;
@@ -22,8 +23,6 @@
     ISVideoFitToolbar *videoFitToolbar;
     ISVideoTrimToolbar *videoTrimToolbar;
     ISColorPicker *videoColorPicker;
-    float minTime;
-    float maxTime;
     AVURLAsset *movieAsset;
 }
 - (void)play;
@@ -104,6 +103,9 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     [self setPlayer:nil];
     [self initScrubberTimer];
     [self syncPlayPauseButtons];
+    NSString *fileName = [[NSBundle mainBundle] pathForResource:@"audio"
+                                                         ofType:@"mp3"];
+    [self playAudio:[NSURL fileURLWithPath:fileName]];
     
     [super viewDidLoad];
 }
@@ -119,7 +121,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     [self removePlayerTimeObserver];
     [self.mPlayer removeObserver:self forKeyPath:@"rate"];
     [mPlayer.currentItem removeObserver:self forKeyPath:@"status"];
-    [self.mPlayer pause];
+    [self pause];
     [super viewWillDisappear:animated];
 }
 
@@ -134,6 +136,17 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 }
 
 #pragma mark Asset URL
+- (void)playAudio:(NSURL *)audioURL;
+{
+    self.audioPlayer = nil;
+    NSError *error = nil;
+    self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:audioURL error:&error];
+    [self.audioPlayer setNumberOfLoops:-1];
+    self.audioPlayer.volume = 1;
+    [[ISVideoManager sharedInstance] setAudioStartTime:20.f];
+    [[ISVideoManager sharedInstance] setAudioEndTime:[self.audioPlayer duration]];
+    [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
+}
 
 - (void)setURL:(NSURL*)URL
 {
@@ -201,23 +214,28 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     if (YES == seekToZeroBeforePlay)
     {
         seekToZeroBeforePlay = NO;
-        [self.mPlayer seekToTime:CMTimeMakeWithSeconds(minTime, 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+        [self.mPlayer seekToTime:CMTimeMakeWithSeconds([[ISVideoManager sharedInstance] videoStartTime], 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+        [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
     }
     [self.mPlayer play];
+    [self.audioPlayer play];
     [self syncPlayPauseButtons];
 }
 
 - (void)pause
 {
     [self.mPlayer pause];
+    [self.audioPlayer pause];
     [self syncPlayPauseButtons];
 }
 
 - (void)restart
 {
     [self.mScrubber setHidden:NO];
-    [self.mPlayer seekToTime:CMTimeMakeWithSeconds(minTime, 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+    [self.mPlayer seekToTime:CMTimeMakeWithSeconds([[ISVideoManager sharedInstance] videoStartTime], 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
     [self.mPlayer play];
+    [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
+    [self.audioPlayer play];
     [self syncPlayPauseButtons];
 }
 
@@ -273,11 +291,14 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 - (void)syncScrubber
 {
     CGFloat currentSecond = (float)self.mPlayerItem.currentTime.value/(float)self.mPlayerItem.currentTime.timescale;
-    if (currentSecond >= maxTime) {
-        [self.mPlayer pause];
+    if (currentSecond >= [[ISVideoManager sharedInstance] videoEndTime]) {
+        [self pause];
         seekToZeroBeforePlay = YES;
     }
-    [self.mScrubber setProgress:(currentSecond - minTime)/(maxTime - minTime) animated:NO];
+    if (self.audioPlayer.currentTime >= [[ISVideoManager sharedInstance] audioEndTime]) {
+        [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
+    }
+    [self.mScrubber setProgress:(currentSecond - [[ISVideoManager sharedInstance] videoStartTime])/([[ISVideoManager sharedInstance] videoEndTime] - [[ISVideoManager sharedInstance] videoStartTime]) animated:NO];
 }
 
 #pragma mark--
@@ -312,7 +333,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 - (void)mainToolbar:(ISMainToolbar *)toolbar clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     [self.mScrubber setHidden:YES];
-    [self.mPlayer pause];
+    [self pause];
     switch (buttonIndex) {
         case 0:
         {
@@ -322,7 +343,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
                 videoTrimToolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleWidth;
                 [self.view addSubview:videoTrimToolbar];
             }
-            [videoTrimToolbar setMinValue:minTime andMaxValue:maxTime andDuration:self.duration];
+            [videoTrimToolbar setMinValue:[[ISVideoManager sharedInstance] videoStartTime] andMaxValue:[[ISVideoManager sharedInstance] videoEndTime] andDuration:self.duration];
             [self showSubToolbar:videoTrimToolbar];
             break;
         }
@@ -399,18 +420,18 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 - (void)videoTrimToolbar:(ISVideoTrimToolbar *)toolbar rangeSliderDidSelectedAtMinValue:(float)minValue andMaxValue:(float)maxValue
 {
     [self hideSubToolbar:toolbar];
-    minTime = minValue;
-    maxTime = maxValue;
+    [[ISVideoManager sharedInstance] setVideoStartTime:minValue];
+    [[ISVideoManager sharedInstance] setVideoEndTime:maxValue];
 }
 
 - (void)videoTrimToolbar:(ISVideoTrimToolbar *)toolbar rangeSliderValueDidChangedAtMinValue:(float)minValue andMaxValue:(float)maxValue isMaxValueChanged:(BOOL)yes
 {
     [self.mScrubber setHidden:YES];
     if (!yes) {
-        minTime = minValue;
+        [[ISVideoManager sharedInstance] setVideoStartTime:minValue];
         [self.mPlayer seekToTime:CMTimeMakeWithSeconds(minValue, 10) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
     }else{
-        maxTime = maxValue;
+        [[ISVideoManager sharedInstance] setVideoEndTime:maxValue];
         seekToZeroBeforePlay = YES;
         [self.mPlayer seekToTime:CMTimeMakeWithSeconds(maxValue, 10) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
     }
@@ -498,10 +519,19 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (buttonIndex == 0) {
-        
+        ISAudioVolumePoupView *volumePopupView = [[ISAudioVolumePoupView alloc] initWithVideoVolume:self.mPlayer.volume musicVolume:self.audioPlayer.volume delegate:self];
+        [volumePopupView showAtView:self.view];
     }else{
         
     }
+}
+
+#pragma mark--
+#pragma mark-- ISAudioVolumePopupView delegate
+- (void)volumePopupView:(ISAudioVolumePoupView *)volumePopupView videoVolumeChangedTo:(float)videoVolume musicVolumeChangedTo:(float)musicVolume
+{
+    self.audioPlayer.volume = musicVolume;
+    self.mPlayer.volume = videoVolume;
 }
 
 @end
@@ -700,9 +730,11 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         
         [self syncPlayPauseButtons];
     }
-    minTime = 0.f;
+    [[ISVideoManager sharedInstance] setVideoStartTime:0.f];
+    self.mPlayer.volume = 0.5f;
     [self.mScrubber setProgress:0.f];
     [self.mPlayer play];
+    [self.audioPlayer play];
 }
 
 #pragma mark -
@@ -753,7 +785,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
                  its duration can be fetched from the item. */
                 
                 [self initScrubberTimer];
-                maxTime = [self duration];
+                [[ISVideoManager sharedInstance] setVideoEndTime:[self duration]];
             }
                 break;
                 

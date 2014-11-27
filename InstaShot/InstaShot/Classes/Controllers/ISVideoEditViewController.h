@@ -39,6 +39,7 @@
 @property (nonatomic, strong) IBOutlet UIButton *mPlayButton;
 @property (nonatomic, strong) IBOutlet UIButton *mRestartButton;
 @property (nonatomic, strong) IBOutlet UIProgressView* mScrubber;
+@property (nonatomic, strong) AVAudioPlayer *audioPlayer;
 
 @property AVMutableComposition *composition;
 @property AVMutableVideoComposition *videoComposition;
