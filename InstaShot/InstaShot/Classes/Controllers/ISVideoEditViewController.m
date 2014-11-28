@@ -261,8 +261,70 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     }
     else
     {
+        if (YES == seekToZeroBeforePlay) {
+            [self.mRestartButton setHidden:YES];
+        }else{
+            [self.mRestartButton setHidden:NO];
+        }
         [self.mPlayButton setHidden:NO];
-        [self.mRestartButton setHidden:NO];
+    }
+}
+
+- (void)updateVideoLayoutByFitAndBorderType:(VideoFitType)fitType andBorderType:(VideoBorderType)borderType andBackgroundColor:(UIColor *)color
+{
+    CGPoint borderViewCenter = self.mPlayBorderView.center;
+    self.mPlayBorderView.frame = CGRectMake(0, 0, self.mPlayView.frame.size.width - ISVIDEO_PLAYBACK_VIEW_BORDER_WIDTH_PER*borderType*2, self.mPlayView.frame.size.height - ISVIDEO_PLAYBACK_VIEW_BORDER_WIDTH_PER*borderType*2);
+    self.mPlayBorderView.center = borderViewCenter;
+    
+    switch (fitType) {
+        case VideoFitTypeOriginal:
+        {
+            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
+            self.mPlayView.backgroundColor = [UIColor clearColor];
+            self.mPlayBorderView.frame = CGRectMake(0, 0, self.mPlayView.frame.size.width, self.mPlayView.frame.size.height);
+            self.mPlaybackView.frame = CGRectMake(0, 0, self.mPlayBorderView.frame.size.width, self.mPlayBorderView.frame.size.height);
+            break;
+        }
+        case VideoFitTypeFit:
+        {
+            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
+            self.mPlayView.backgroundColor = color;
+            self.mPlaybackView.frame = CGRectMake(0, 0, self.mPlayBorderView.frame.size.width, self.mPlayBorderView.frame.size.height);
+            break;
+        }
+        case VideoFitTypeFull:
+        {
+            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspectFill];
+            self.mPlayView.backgroundColor = color;
+            self.mPlaybackView.frame = CGRectMake(0, 0, self.mPlayBorderView.frame.size.width, self.mPlayBorderView.frame.size.height);
+            break;
+        }
+        case VideoFitTypeLeft:
+        {
+            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
+            self.mPlayView.backgroundColor = color;
+            CGRect rect = [self.mPlaybackView videoRect];
+            if ([[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeOriginal || [[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeRotate180) {
+                self.mPlaybackView.frame = CGRectMake(-(self.mPlaybackView.frame.size.width - rect.size.width)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
+            }else{
+                self.mPlaybackView.frame = CGRectMake(-(self.mPlaybackView.frame.size.width - rect.size.height)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
+            }
+            break;
+        }
+        case VideoFitTypeRight:
+        {
+            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
+            self.mPlayView.backgroundColor = color;
+            CGRect rect = [self.mPlaybackView videoRect];
+            if ([[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeOriginal || [[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeRotate180) {
+                self.mPlaybackView.frame = CGRectMake((self.mPlaybackView.frame.size.width - rect.size.width)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
+            }else{
+                self.mPlaybackView.frame = CGRectMake((self.mPlaybackView.frame.size.width - rect.size.height)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
+            }
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -349,8 +411,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     }
     [audioTrimToolbar setStartTime:self.audio.startTime andMaxTime:self.audio.duration andMusicName:self.audio.fileName];
     [self showSubToolbar:audioTrimToolbar onCompletion:^(BOOL success) {
-        [self.mPlayer seekToTime:CMTimeMakeWithSeconds([[ISVideoManager sharedInstance] videoStartTime], 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
-        [self play];
+        [self restart];
         ISAudioVolumePoupView *volumePopupView = [[ISAudioVolumePoupView alloc] initWithVideoVolume:self.mPlayer.volume musicVolume:self.audioPlayer.volume delegate:self];
         [volumePopupView showAtView:self.view];
     }];
@@ -379,7 +440,6 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         }
         case 1:
         {
-            [panGestureRecognizer setEnabled:YES];
             if (videoFitToolbar == nil || videoFitToolbar.superview == nil) {
                 videoFitToolbar = [[ISVideoFitToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height, self.view.bounds.size.width, 104)];
                 videoFitToolbar.delegate = self;
@@ -388,7 +448,11 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
             }
             [videoFitToolbar setFitType:[[ISVideoManager sharedInstance] videoFitType] andBorderType:[[ISVideoManager sharedInstance] videoBorderType]];
             [self showSubToolbar:videoFitToolbar onCompletion:^(BOOL success) {
-                
+                if ([[ISVideoManager sharedInstance] videoFitType] == VideoFitTypeOriginal) {
+                    [panGestureRecognizer setEnabled:NO];
+                }else{
+                    [panGestureRecognizer setEnabled:YES];
+                }
             }];
             break;
         }
@@ -425,12 +489,15 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
             }else{
                 [ISVideoManager sharedInstance].videoRotateType ++;
             }
+            NSLog(@"%f:%f",self.mPlayBorderView.frame.size.width/2,self.mPlayBorderView.frame.size.height/2);
+//            self.mPlaybackView.layer.anchorPoint = CGPointMake(self.mPlayBorderView.frame.size.width/2, self.mPlayBorderView.frame.size.height/2);
             VideoFlipType curFlipType = [[ISVideoManager sharedInstance] videoFlipType];
             if (curFlipType == VideoFlipTypeOriginal) {
                 self.mPlaybackView.transform = CGAffineTransformRotate(self.mPlaybackView.transform, 90.0 *M_PI / 180.0);
             }else{
                 self.mPlaybackView.transform = CGAffineTransformRotate(self.mPlaybackView.transform, -90.0 *M_PI / 180.0);
             }
+            NSLog(@"%f:%f",self.mPlaybackView.frame.origin.x,self.mPlaybackView.frame.origin.y);
             break;
         }
         case 5:
@@ -485,65 +552,16 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         [[ISVideoManager sharedInstance] setVideoFitType:fitType];
         [[ISVideoManager sharedInstance] setVideoBorderType:borderType];
         [self hideSubToolbar:toolbar onCompletion:^(BOOL success) {
-            
+            [panGestureRecognizer setEnabled:NO];
         }];
-        [panGestureRecognizer setEnabled:NO];
+    }else{
+        if (fitType == VideoFitTypeOriginal) {
+            [panGestureRecognizer setEnabled:NO];
+        }else{
+            [panGestureRecognizer setEnabled:YES];
+        }
     }
-    
-    CGPoint borderViewCenter = self.mPlayBorderView.center;
-    self.mPlayBorderView.frame = CGRectMake(0, 0, self.mPlayView.frame.size.width - ISVIDEO_PLAYBACK_VIEW_BORDER_WIDTH_PER*borderType*2, self.mPlayView.frame.size.height - ISVIDEO_PLAYBACK_VIEW_BORDER_WIDTH_PER*borderType*2);
-    self.mPlayBorderView.center = borderViewCenter;
-    
-    switch (fitType) {
-        case VideoFitTypeOriginal:
-        {
-            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
-            self.mPlayView.backgroundColor = [UIColor clearColor];
-            self.mPlayBorderView.frame = CGRectMake(0, 0, self.mPlayView.frame.size.width, self.mPlayView.frame.size.height);
-            self.mPlaybackView.frame = CGRectMake(0, 0, self.mPlayBorderView.frame.size.width, self.mPlayBorderView.frame.size.height);
-            break;
-        }
-        case VideoFitTypeFit:
-        {
-            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
-            self.mPlayView.backgroundColor = [[ISVideoManager sharedInstance] videoBgColor];
-            self.mPlaybackView.frame = CGRectMake(0, 0, self.mPlayBorderView.frame.size.width, self.mPlayBorderView.frame.size.height);
-            break;
-        }
-        case VideoFitTypeFull:
-        {
-            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspectFill];
-            self.mPlayView.backgroundColor = [[ISVideoManager sharedInstance] videoBgColor];
-            self.mPlaybackView.frame = CGRectMake(0, 0, self.mPlayBorderView.frame.size.width, self.mPlayBorderView.frame.size.height);
-            break;
-        }
-        case VideoFitTypeLeft:
-        {
-            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
-            self.mPlayView.backgroundColor = [[ISVideoManager sharedInstance] videoBgColor];
-            CGRect rect = [self.mPlaybackView videoRect];
-            if ([[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeOriginal || [[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeRotate180) {
-                self.mPlaybackView.frame = CGRectMake(-(self.mPlaybackView.frame.size.width - rect.size.width)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
-            }else{
-                self.mPlaybackView.frame = CGRectMake(-(self.mPlaybackView.frame.size.width - rect.size.height)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
-            }
-            break;
-        }
-        case VideoFitTypeRight:
-        {
-            [self.mPlaybackView setVideoFillMode:AVLayerVideoGravityResizeAspect];
-            self.mPlayView.backgroundColor = [[ISVideoManager sharedInstance] videoBgColor];
-            CGRect rect = [self.mPlaybackView videoRect];
-            if ([[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeOriginal || [[ISVideoManager sharedInstance] videoRotateType] == VideoRotateTypeRotate180) {
-                self.mPlaybackView.frame = CGRectMake((self.mPlaybackView.frame.size.width - rect.size.width)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
-            }else{
-                self.mPlaybackView.frame = CGRectMake((self.mPlaybackView.frame.size.width - rect.size.height)/2, 0, self.mPlaybackView.frame.size.width, self.mPlaybackView.frame.size.height);
-            }
-            break;
-        }
-        default:
-            break;
-    }
+    [self updateVideoLayoutByFitAndBorderType:fitType andBorderType:borderType andBackgroundColor:[[ISVideoManager sharedInstance] videoBgColor]];
 }
 
 #pragma mark--
@@ -556,7 +574,8 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
             
         }];
     }
-    self.mPlayView.backgroundColor = color;
+    [[ISVideoManager sharedInstance] setVideoFitType:VideoFitTypeFit];
+    [self updateVideoLayoutByFitAndBorderType:[[ISVideoManager sharedInstance] videoFitType] andBorderType:[[ISVideoManager sharedInstance] videoBorderType] andBackgroundColor:color];
 }
 
 #pragma mark--
@@ -583,7 +602,12 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         audio.fileName = [NSString stringWithFormat:@"audio.mp3"];
         audio.startTime = 0.f;
         self.audio = audio;
-        [self showAudioEditToolbar];
+        if (audioTrimToolbar.superview != nil) {
+            [audioTrimToolbar setStartTime:self.audio.startTime andMaxTime:self.audio.duration andMusicName:self.audio.fileName];
+            [self restart];
+        }else{
+            [self showAudioEditToolbar];
+        }
     }else{
         //choose from library
         MPMediaPickerController *mediaPicker = [[MPMediaPickerController alloc] initWithMediaTypes:MPMediaTypeMusic];
@@ -626,6 +650,33 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     [self restart];
 }
 
+- (void)deleteMusic:(ISAudioTrimToolbar *)toolbar
+{
+    self.audio = nil;
+    [[ISVideoManager sharedInstance] setAudioURL:nil];
+    [[ISVideoManager sharedInstance] setAudioFileName:nil];
+    [[ISVideoManager sharedInstance] setAudioStartTime:0];
+    [[ISVideoManager sharedInstance] setAudioDuration:0];
+    [self hideSubToolbar:toolbar onCompletion:^(BOOL success) {
+        self.mPlayer.volume = 1;
+        [[ISVideoManager sharedInstance] setVideoVolume:1];
+        [self restart];
+    }];
+}
+
+- (void)reselectMusic:(ISAudioTrimToolbar *)toolbar
+{
+    ISAudioPickerPopupView *audioPickerPopupView = [[ISAudioPickerPopupView alloc] init];
+    audioPickerPopupView.delegate = self;
+    [audioPickerPopupView showOnView:self.view];
+}
+
+- (void)editVolume:(ISAudioTrimToolbar *)toolbar
+{
+    ISAudioVolumePoupView *volumePopupView = [[ISAudioVolumePoupView alloc] initWithVideoVolume:self.mPlayer.volume musicVolume:self.audioPlayer.volume delegate:self];
+    [volumePopupView showAtView:self.view];
+}
+
 #pragma mark--
 #pragma mark-- MPMediaPickerControllerDelegate
 - (void)mediaPicker:(MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection
@@ -638,7 +689,12 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     audio.fileName = musicItem.title;
     audio.startTime = 0.f;
     self.audio = audio;
-    [self showAudioEditToolbar];
+    if (audioTrimToolbar.superview != nil) {
+        [audioTrimToolbar setStartTime:self.audio.startTime andMaxTime:self.audio.duration andMusicName:self.audio.fileName];
+        [self restart];
+    }else{
+        [self showAudioEditToolbar];
+    }
 }
 
 - (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker

@@ -33,8 +33,8 @@
 @optional
 - (void)audioTrimToolbar:(ISAudioTrimToolbar *)toolbar previewStartTimeDidSelectedAt:(float)startTime;
 - (void)audioTrimToolbar:(ISAudioTrimToolbar *)toolbar isChangesCancelled:(BOOL)isCancelled;
-- (void)deleteMusic;
-- (void)reselectMusic;
-- (void)editVolume;
+- (void)deleteMusic:(ISAudioTrimToolbar *)toolbar;
+- (void)reselectMusic:(ISAudioTrimToolbar *)toolbar;
+- (void)editVolume:(ISAudioTrimToolbar *)toolbar;
 
 @end

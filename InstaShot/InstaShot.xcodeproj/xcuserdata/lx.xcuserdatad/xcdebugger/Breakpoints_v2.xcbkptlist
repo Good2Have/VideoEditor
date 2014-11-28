@@ -9,13 +9,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "InstaShot/Classes/Views/ISAudioTrimToolbar.m"
-            timestampString = "438864772.794578"
+            filePath = "InstaShot/Classes/Controllers/ISVideoEditViewController.m"
+            timestampString = "438879685.877522"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "122"
-            endingLineNumber = "122"
-            landmarkName = "-confirmToolbar:clickedButtonAtIndex:"
+            startingLineNumber = "571"
+            endingLineNumber = "571"
+            landmarkName = "-colorPicker:selectedAtColor:isFinishEditing:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

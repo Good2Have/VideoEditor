@@ -21,6 +21,6 @@
 #define STRING_CHOOSE_MUSIC_FROM_LIBRARY            @"Music Library"
 #define STRING_EDIT_VOLUME                          @"Edit Volume"
 #define STRING_RESELECT_MUSIC                       @"Reselect Music"
-#define STRING_DELETE_MUSIC                         @"Delete Misic"
+#define STRING_DELETE_MUSIC                         @"Delete Music"
 
 #endif

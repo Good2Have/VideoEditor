@@ -107,11 +107,11 @@
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (buttonIndex == 0) {
-        [_delegate editVolume];
+        [_delegate editVolume:self];
     }else if(buttonIndex == 1){
-        [_delegate reselectMusic];
-    }else{
-        [_delegate deleteMusic];
+        [_delegate reselectMusic:self];
+    }else if(buttonIndex == 2){
+        [_delegate deleteMusic:self];
     }
 }
 
