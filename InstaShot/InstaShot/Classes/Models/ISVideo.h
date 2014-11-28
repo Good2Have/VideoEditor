@@ -50,9 +50,12 @@ typedef UInt32 VideoFlipType;
 @property (assign, nonatomic) VideoFlipType flipType;
 @property (assign, nonatomic) float startTime;
 @property (assign, nonatomic) float endTime;
+@property (assign, nonatomic) float volume;
 
 @property (strong, nonatomic) NSURL *audioURL;
+@property (strong, nonatomic) NSString *audioFileName;
 @property (assign, nonatomic) float audioStartTime;
-@property (assign, nonatomic) float audioEndTime;
+@property (assign, nonatomic) float audioDuration;
+@property (assign, nonatomic) float audioVolume;
 
 @end

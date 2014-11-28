@@ -82,9 +82,24 @@
     return self.video.audioStartTime;
 }
 
-- (float)audioEndTime
+- (float)audioDuration
 {
-    return self.video.audioEndTime;
+    return self.video.audioDuration;
+}
+
+- (float)videoVolume
+{
+    return self.video.volume;
+}
+
+- (float)audioVolume
+{
+    return self.video.audioVolume;
+}
+
+- (NSString *)audioFileName
+{
+    return self.video.audioFileName;
 }
 
 - (void)setVideoDuration:(float)duration
@@ -136,9 +151,24 @@
     self.video.audioStartTime = startTime;
 }
 
-- (void)setAudioEndTime:(float)endTime
+- (void)setAudioDuration:(float)audioDuration
 {
-    self.video.audioEndTime = endTime;
+    self.video.audioDuration = audioDuration;
+}
+
+- (void)setVideoVolume:(float)volume
+{
+    self.video.volume = volume;
+}
+
+- (void)setAudioVolume:(float)audioVolume
+{
+    self.video.audioVolume = audioVolume;
+}
+
+- (void)setAudioFileName:(NSString *)audioFileName
+{
+    self.video.audioFileName = audioFileName;
 }
 
 - (void)reset

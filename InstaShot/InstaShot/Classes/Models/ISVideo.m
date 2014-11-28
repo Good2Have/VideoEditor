@@ -15,6 +15,15 @@
     self = [super init];
     if (self) {
         self.bgColor = [UIColor whiteColor];
+        self.fitType = VideoFitTypeFit;
+        self.borderType = VideoBorderTypeOriginal;
+        self.rotateType = VideoRotateTypeOriginal;
+        self.flipType = VideoFlipTypeOriginal;
+        self.startTime = 0;
+        self.endTime = 0;
+        self.volume = 1;
+        self.audioStartTime = 0;
+        self.audioVolume = 1;
     }
     return self;
 }

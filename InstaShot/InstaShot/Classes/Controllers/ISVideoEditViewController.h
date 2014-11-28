@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ISVideoPlaybackView.h"
 #import <AVFoundation/AVFoundation.h>
+#import "ISAudio.h"
 
 @interface ISVideoEditViewController : UIViewController
 {
@@ -40,6 +41,7 @@
 @property (nonatomic, strong) IBOutlet UIButton *mRestartButton;
 @property (nonatomic, strong) IBOutlet UIProgressView* mScrubber;
 @property (nonatomic, strong) AVAudioPlayer *audioPlayer;
+@property (nonatomic, strong) ISAudio *audio;
 
 @property AVMutableComposition *composition;
 @property AVMutableVideoComposition *videoComposition;

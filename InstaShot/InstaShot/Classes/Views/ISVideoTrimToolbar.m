@@ -58,7 +58,7 @@
         image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0)];
         rangePickSlider.trackBackgroundImage = image;
         
-        image = [UIImage imageNamed:@"slide_volume"];
+        image = [UIImage imageNamed:@"slide_trim_bg"];
         image = [image resizableImageWithCapInsets:UIEdgeInsetsMake(0.0, 10.0, 0.0, 2.0)];
         rangePickSlider.trackImage = image;
         

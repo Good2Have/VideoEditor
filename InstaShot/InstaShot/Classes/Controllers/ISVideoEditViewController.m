@@ -10,18 +10,24 @@
 #import "ISMainToolbar.h"
 #import "ISVideoFitToolbar.h"
 #import "ISVideoTrimToolbar.h"
+#import "ISAudioTrimToolbar.h"
 #import "ISColorPicker.h"
 #import "ISAudioVolumePoupView.h"
+#import "ISAudioPickerPopupView.h"
+#import <MediaPlayer/MediaPlayer.h>
 
 #define ISVIDEO_PLAYBACK_VIEW_BORDER_WIDTH_PER   10
 
-@interface ISVideoEditViewController ()<UIGestureRecognizerDelegate,ISMainToolbarDelegate,ISVideoTrimToolbarDelegate,ISColorPickerDelegate,ISVideoFitToolbarDelegate,UIActionSheetDelegate,ISAudioVolumePoupViewDelegate>
+typedef void (^ShowEditModeFinishResponseBlock)(BOOL success);
+
+@interface ISVideoEditViewController ()<UIGestureRecognizerDelegate,ISMainToolbarDelegate,ISVideoTrimToolbarDelegate,ISColorPickerDelegate,ISVideoFitToolbarDelegate,ISAudioVolumePoupViewDelegate,ISAudioPickerPopupViewDelegate,ISAudioTrimToolbarDelegate,MPMediaPickerControllerDelegate>
 {
     UIPanGestureRecognizer *panGestureRecognizer;
     UITapGestureRecognizer *tapGestureRecognizer;
     ISMainToolbar *mainToolbar;
     ISVideoFitToolbar *videoFitToolbar;
     ISVideoTrimToolbar *videoTrimToolbar;
+    ISAudioTrimToolbar *audioTrimToolbar;
     ISColorPicker *videoColorPicker;
     AVURLAsset *movieAsset;
 }
@@ -103,9 +109,6 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     [self setPlayer:nil];
     [self initScrubberTimer];
     [self syncPlayPauseButtons];
-    NSString *fileName = [[NSBundle mainBundle] pathForResource:@"audio"
-                                                         ofType:@"mp3"];
-    [self playAudio:[NSURL fileURLWithPath:fileName]];
     
     [super viewDidLoad];
 }
@@ -113,15 +116,27 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 - (void)viewWillAppear:(BOOL)animated
 {
     [self.mPlayView setBackgroundColor:[[ISVideoManager sharedInstance] videoBgColor]];
+    if (self.mPlayerItem != nil) {
+        [self.mPlayerItem addObserver:self
+                           forKeyPath:@"status"
+                              options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                              context:AVPlayerDemoPlaybackViewControllerStatusObservationContext];
+    }
+    if (self.mPlayer != nil) {
+        [self.player addObserver:self
+                      forKeyPath:@"rate"
+                         options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                         context:AVPlayerDemoPlaybackViewControllerRateObservationContext];
+    }
     [super viewWillAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    [self pause];
     [self removePlayerTimeObserver];
     [self.mPlayer removeObserver:self forKeyPath:@"rate"];
-    [mPlayer.currentItem removeObserver:self forKeyPath:@"status"];
-    [self pause];
+    [self.mPlayer.currentItem removeObserver:self forKeyPath:@"status"];
     [super viewWillDisappear:animated];
 }
 
@@ -136,16 +151,14 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 }
 
 #pragma mark Asset URL
-- (void)playAudio:(NSURL *)audioURL;
+- (void)setAudio:(ISAudio *)audio
 {
     self.audioPlayer = nil;
     NSError *error = nil;
-    self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:audioURL error:&error];
+    self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:audio.audioURL error:&error];
     [self.audioPlayer setNumberOfLoops:-1];
-    self.audioPlayer.volume = 1;
-    [[ISVideoManager sharedInstance] setAudioStartTime:20.f];
-    [[ISVideoManager sharedInstance] setAudioEndTime:[self.audioPlayer duration]];
-    [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
+    audio.duration = [self.audioPlayer duration];
+    _audio = audio;
 }
 
 - (void)setURL:(NSURL*)URL
@@ -215,7 +228,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     {
         seekToZeroBeforePlay = NO;
         [self.mPlayer seekToTime:CMTimeMakeWithSeconds([[ISVideoManager sharedInstance] videoStartTime], 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
-        [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
+        [self.audioPlayer setCurrentTime:self.audio.startTime];
     }
     [self.mPlayer play];
     [self.audioPlayer play];
@@ -234,7 +247,7 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     [self.mScrubber setHidden:NO];
     [self.mPlayer seekToTime:CMTimeMakeWithSeconds([[ISVideoManager sharedInstance] videoStartTime], 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
     [self.mPlayer play];
-    [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
+    [self.audioPlayer setCurrentTime:self.audio.startTime];
     [self.audioPlayer play];
     [self syncPlayPauseButtons];
 }
@@ -295,15 +308,12 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         [self pause];
         seekToZeroBeforePlay = YES;
     }
-    if (self.audioPlayer.currentTime >= [[ISVideoManager sharedInstance] audioEndTime]) {
-        [self.audioPlayer setCurrentTime:[[ISVideoManager sharedInstance] audioStartTime]];
-    }
     [self.mScrubber setProgress:(currentSecond - [[ISVideoManager sharedInstance] videoStartTime])/([[ISVideoManager sharedInstance] videoEndTime] - [[ISVideoManager sharedInstance] videoStartTime]) animated:NO];
 }
 
 #pragma mark--
 #pragma mark-- Animation Implementation
-- (void)showSubToolbar:(UIView *)toolbar
+- (void)showSubToolbar:(UIView *)toolbar onCompletion:(ShowEditModeFinishResponseBlock)codeBlock
 {
     [UIView animateWithDuration:0.3f animations:^{
         mainToolbar.center = CGPointMake(mainToolbar.center.x, mainToolbar.center.y + mainToolbar.frame.size.height);
@@ -312,12 +322,12 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         [UIView animateWithDuration:0.3f delay:0.3 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             toolbar.center = CGPointMake(toolbar.center.x, toolbar.center.y - toolbar.frame.size.height);
         } completion:^(BOOL finished) {
-            
+            codeBlock(finished);
         }];
     }];
 }
 
-- (void)hideSubToolbar:(UIView *)toolbar
+- (void)hideSubToolbar:(UIView *)toolbar onCompletion:(ShowEditModeFinishResponseBlock)codeBlock
 {
     [UIView animateWithDuration:0.3f animations:^{
         toolbar.center = CGPointMake(toolbar.center.x, toolbar.center.y + toolbar.frame.size.height);
@@ -325,6 +335,24 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         [toolbar removeFromSuperview];
         [self.navigationController setNavigationBarHidden:NO animated:YES];
         mainToolbar.center = CGPointMake(mainToolbar.center.x, mainToolbar.center.y - mainToolbar.frame.size.height);
+        codeBlock(finished);
+    }];
+}
+
+- (void)showAudioEditToolbar
+{
+    if (audioTrimToolbar == nil || audioTrimToolbar.superview == nil) {
+        audioTrimToolbar = [[ISAudioTrimToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height, self.view.bounds.size.width, 104)];
+        audioTrimToolbar.delegate = self;
+        audioTrimToolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:audioTrimToolbar];
+    }
+    [audioTrimToolbar setStartTime:self.audio.startTime andMaxTime:self.audio.duration andMusicName:self.audio.fileName];
+    [self showSubToolbar:audioTrimToolbar onCompletion:^(BOOL success) {
+        [self.mPlayer seekToTime:CMTimeMakeWithSeconds([[ISVideoManager sharedInstance] videoStartTime], 3) toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
+        [self play];
+        ISAudioVolumePoupView *volumePopupView = [[ISAudioVolumePoupView alloc] initWithVideoVolume:self.mPlayer.volume musicVolume:self.audioPlayer.volume delegate:self];
+        [volumePopupView showAtView:self.view];
     }];
 }
 
@@ -344,7 +372,9 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
                 [self.view addSubview:videoTrimToolbar];
             }
             [videoTrimToolbar setMinValue:[[ISVideoManager sharedInstance] videoStartTime] andMaxValue:[[ISVideoManager sharedInstance] videoEndTime] andDuration:self.duration];
-            [self showSubToolbar:videoTrimToolbar];
+            [self showSubToolbar:videoTrimToolbar onCompletion:^(BOOL success) {
+                
+            }];
             break;
         }
         case 1:
@@ -357,13 +387,20 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
                 [self.view addSubview:videoFitToolbar];
             }
             [videoFitToolbar setFitType:[[ISVideoManager sharedInstance] videoFitType] andBorderType:[[ISVideoManager sharedInstance] videoBorderType]];
-            [self showSubToolbar:videoFitToolbar];
+            [self showSubToolbar:videoFitToolbar onCompletion:^(BOOL success) {
+                
+            }];
             break;
         }
         case 2:
         {
-            UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:STRING_CHOOSE_MUSIC_ACTION_SHEET_TITLE delegate:self cancelButtonTitle:STRING_CANCEL destructiveButtonTitle:nil otherButtonTitles:STRING_CHOOSE_MUSIC_FROM_THEME, STRING_CHOOSE_MUSIC_FROM_LIBRARY, nil];
-            [actionSheet showInView:self.view];
+            if ([[ISVideoManager sharedInstance] audioURL] == nil) {
+                ISAudioPickerPopupView *audioPickerPopupView = [[ISAudioPickerPopupView alloc] init];
+                audioPickerPopupView.delegate = self;
+                [audioPickerPopupView showOnView:self.view];
+            }else{
+                [self showAudioEditToolbar];
+            }
             break;
         }
         case 3:
@@ -375,7 +412,9 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
                 [self.view addSubview:videoColorPicker];
             }
             videoColorPicker.orgColor = [[ISVideoManager sharedInstance] videoBgColor];
-            [self showSubToolbar:videoColorPicker];
+            [self showSubToolbar:videoColorPicker onCompletion:^(BOOL success) {
+                
+            }];
             break;
         }
         case 4:
@@ -419,7 +458,9 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 #pragma mark-- ISVideoTrimToolbar Delegate
 - (void)videoTrimToolbar:(ISVideoTrimToolbar *)toolbar rangeSliderDidSelectedAtMinValue:(float)minValue andMaxValue:(float)maxValue
 {
-    [self hideSubToolbar:toolbar];
+    [self hideSubToolbar:toolbar onCompletion:^(BOOL success) {
+        
+    }];
     [[ISVideoManager sharedInstance] setVideoStartTime:minValue];
     [[ISVideoManager sharedInstance] setVideoEndTime:maxValue];
 }
@@ -443,7 +484,9 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
     if (isFinishEditing) {
         [[ISVideoManager sharedInstance] setVideoFitType:fitType];
         [[ISVideoManager sharedInstance] setVideoBorderType:borderType];
-        [self hideSubToolbar:toolbar];
+        [self hideSubToolbar:toolbar onCompletion:^(BOOL success) {
+            
+        }];
         [panGestureRecognizer setEnabled:NO];
     }
     
@@ -509,29 +552,98 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
 {
     if (isFinishEditing) {
         [[ISVideoManager sharedInstance] setVideoBgColor:color];
-        [self hideSubToolbar:colorPicker];
+        [self hideSubToolbar:colorPicker onCompletion:^(BOOL success) {
+            
+        }];
     }
     self.mPlayView.backgroundColor = color;
-}
-
-#pragma mark--
-#pragma mark-- UIActionSheet Delegate
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (buttonIndex == 0) {
-        ISAudioVolumePoupView *volumePopupView = [[ISAudioVolumePoupView alloc] initWithVideoVolume:self.mPlayer.volume musicVolume:self.audioPlayer.volume delegate:self];
-        [volumePopupView showAtView:self.view];
-    }else{
-        
-    }
 }
 
 #pragma mark--
 #pragma mark-- ISAudioVolumePopupView delegate
 - (void)volumePopupView:(ISAudioVolumePoupView *)volumePopupView videoVolumeChangedTo:(float)videoVolume musicVolumeChangedTo:(float)musicVolume
 {
-    self.audioPlayer.volume = musicVolume;
     self.mPlayer.volume = videoVolume;
+    self.audioPlayer.volume = musicVolume;
+    if (![self isPlaying]) {
+        [self restart];
+    }
+}
+
+#pragma mark--
+#pragma mark-- ISAudioPickerPopupView delegate
+- (void)audioPickerPopupView:(ISAudioPickerPopupView *)pickerPopupView selectedAtIndex:(NSInteger)index
+{
+    if (index == 0) {
+        //choose from theme
+        ISAudio *audio = [[ISAudio alloc] init];
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"audio"
+                                                             ofType:@"mp3"];
+        audio.audioURL = [NSURL fileURLWithPath:filePath];
+        audio.fileName = [NSString stringWithFormat:@"audio.mp3"];
+        audio.startTime = 0.f;
+        self.audio = audio;
+        [self showAudioEditToolbar];
+    }else{
+        //choose from library
+        MPMediaPickerController *mediaPicker = [[MPMediaPickerController alloc] initWithMediaTypes:MPMediaTypeMusic];
+        mediaPicker.delegate = self;
+        mediaPicker.allowsPickingMultipleItems = NO; // this is the default
+        [self presentViewController:mediaPicker animated:YES completion:nil];
+    }
+}
+
+#pragma mark--
+#pragma mark-- ISAudioTrimToolbar delegate
+- (void)audioTrimToolbar:(ISAudioTrimToolbar *)toolbar isChangesCancelled:(BOOL)isCancelled
+{
+    if (isCancelled) {
+        ISAudio *audio = [[ISAudio alloc] init];
+        audio.audioURL = [[ISVideoManager sharedInstance] audioURL];
+        audio.fileName = [[ISVideoManager sharedInstance] audioFileName];
+        audio.startTime = [[ISVideoManager sharedInstance] audioStartTime];
+        audio.duration = [[ISVideoManager sharedInstance] audioDuration];
+        self.audio = audio;
+        self.audioPlayer.volume = [[ISVideoManager sharedInstance] audioVolume];
+        self.mPlayer.volume = [[ISVideoManager sharedInstance] videoVolume];
+    }else{
+        [[ISVideoManager sharedInstance] setAudioURL:self.audio.audioURL];
+        [[ISVideoManager sharedInstance] setAudioFileName:self.audio.fileName];
+        [[ISVideoManager sharedInstance] setAudioStartTime:self.audio.startTime];
+        [[ISVideoManager sharedInstance] setAudioDuration:self.audio.duration];
+        [[ISVideoManager sharedInstance] setAudioVolume:self.audioPlayer.volume];
+        [[ISVideoManager sharedInstance] setVideoVolume:self.mPlayer.volume];
+    }
+    [self hideSubToolbar:toolbar onCompletion:^(BOOL success) {
+        [self restart];
+    }];
+}
+
+- (void)audioTrimToolbar:(ISAudioTrimToolbar *)toolbar previewStartTimeDidSelectedAt:(float)startTime
+{
+    self.audio.startTime = startTime;
+    self.audioPlayer.currentTime = startTime;
+    [self restart];
+}
+
+#pragma mark--
+#pragma mark-- MPMediaPickerControllerDelegate
+- (void)mediaPicker:(MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection
+{
+    [mediaPicker dismissViewControllerAnimated:YES completion:nil];
+    MPMediaItem *musicItem = [mediaItemCollection.items objectAtIndex:0];
+    
+    ISAudio *audio = [[ISAudio alloc] init];
+    audio.audioURL = [musicItem valueForProperty:MPMediaItemPropertyAssetURL];
+    audio.fileName = musicItem.title;
+    audio.startTime = 0.f;
+    self.audio = audio;
+    [self showAudioEditToolbar];
+}
+
+- (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker
+{
+    [mediaPicker dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
@@ -730,11 +842,9 @@ static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &
         
         [self syncPlayPauseButtons];
     }
-    [[ISVideoManager sharedInstance] setVideoStartTime:0.f];
-    self.mPlayer.volume = 0.5f;
+    self.mPlayer.volume = [[ISVideoManager sharedInstance] videoVolume];
     [self.mScrubber setProgress:0.f];
-    [self.mPlayer play];
-    [self.audioPlayer play];
+    [self play];
 }
 
 #pragma mark -

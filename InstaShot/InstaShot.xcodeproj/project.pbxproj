@@ -85,7 +85,6 @@
 		E9AD14481A22DDF200E44B4B /* ISVideoEditViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9AD14461A22DDF200E44B4B /* ISVideoEditViewController.xib */; };
 		E9AD144B1A22E02700E44B4B /* ISVideoPlaybackView.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD144A1A22E02700E44B4B /* ISVideoPlaybackView.m */; };
 		E9AD144E1A22FBF300E44B4B /* Movie.m4v in Resources */ = {isa = PBXBuildFile; fileRef = E9AD144C1A22FBF300E44B4B /* Movie.m4v */; };
-		E9AD144F1A22FBF300E44B4B /* slide_volume@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E9AD144D1A22FBF300E44B4B /* slide_volume@2x.png */; };
 		E9AD14521A230FCF00E44B4B /* ISMainToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD14511A230FCF00E44B4B /* ISMainToolbar.m */; };
 		E9AD14581A2311D900E44B4B /* ISConfirmToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD14571A2311D900E44B4B /* ISConfirmToolbar.m */; };
 		E9AD145B1A2311F400E44B4B /* NMRangeSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD145A1A2311F400E44B4B /* NMRangeSlider.m */; };
@@ -96,6 +95,10 @@
 		E9AD146B1A233CDE00E44B4B /* ISVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD146A1A233CDE00E44B4B /* ISVideoManager.m */; };
 		E9AD14781A2347C700E44B4B /* ISCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD14751A2347C700E44B4B /* ISCommand.m */; };
 		E9AD14791A2347C700E44B4B /* ISRotateCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD14771A2347C700E44B4B /* ISRotateCommand.m */; };
+		E9AD4EF21A28248E00281D9E /* ISAudioPickerPopupView.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD4EF11A28248E00281D9E /* ISAudioPickerPopupView.m */; };
+		E9AD4EF51A28355700281D9E /* ISAudioTrimToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD4EF41A28355700281D9E /* ISAudioTrimToolbar.m */; };
+		E9AD4EF71A28495B00281D9E /* slide_trim_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = E9AD4EF61A28495B00281D9E /* slide_trim_bg@2x.png */; };
+		E9AD4EFA1A284CB300281D9E /* ISAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = E9AD4EF91A284CB300281D9E /* ISAudio.m */; };
 		E9BEE3F51A24711D00A4A674 /* ISVideoFitToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = E9BEE3F41A24711D00A4A674 /* ISVideoFitToolbar.m */; };
 /* End PBXBuildFile section */
 
@@ -201,7 +204,6 @@
 		E9AD14491A22E02700E44B4B /* ISVideoPlaybackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISVideoPlaybackView.h; sourceTree = "<group>"; };
 		E9AD144A1A22E02700E44B4B /* ISVideoPlaybackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISVideoPlaybackView.m; sourceTree = "<group>"; };
 		E9AD144C1A22FBF300E44B4B /* Movie.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = Movie.m4v; sourceTree = "<group>"; };
-		E9AD144D1A22FBF300E44B4B /* slide_volume@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "slide_volume@2x.png"; sourceTree = "<group>"; };
 		E9AD14501A230FCF00E44B4B /* ISMainToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISMainToolbar.h; sourceTree = "<group>"; };
 		E9AD14511A230FCF00E44B4B /* ISMainToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISMainToolbar.m; sourceTree = "<group>"; };
 		E9AD14531A2311CA00E44B4B /* ISVideoTrimToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISVideoTrimToolbar.h; sourceTree = "<group>"; };
@@ -222,6 +224,13 @@
 		E9AD14751A2347C700E44B4B /* ISCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISCommand.m; sourceTree = "<group>"; };
 		E9AD14761A2347C700E44B4B /* ISRotateCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISRotateCommand.h; sourceTree = "<group>"; };
 		E9AD14771A2347C700E44B4B /* ISRotateCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISRotateCommand.m; sourceTree = "<group>"; };
+		E9AD4EF01A28248E00281D9E /* ISAudioPickerPopupView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISAudioPickerPopupView.h; sourceTree = "<group>"; };
+		E9AD4EF11A28248E00281D9E /* ISAudioPickerPopupView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISAudioPickerPopupView.m; sourceTree = "<group>"; };
+		E9AD4EF31A28355700281D9E /* ISAudioTrimToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISAudioTrimToolbar.h; sourceTree = "<group>"; };
+		E9AD4EF41A28355700281D9E /* ISAudioTrimToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISAudioTrimToolbar.m; sourceTree = "<group>"; };
+		E9AD4EF61A28495B00281D9E /* slide_trim_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "slide_trim_bg@2x.png"; sourceTree = "<group>"; };
+		E9AD4EF81A284CB300281D9E /* ISAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISAudio.h; sourceTree = "<group>"; };
+		E9AD4EF91A284CB300281D9E /* ISAudio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISAudio.m; sourceTree = "<group>"; };
 		E9BEE3F31A24711D00A4A674 /* ISVideoFitToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISVideoFitToolbar.h; sourceTree = "<group>"; };
 		E9BEE3F41A24711D00A4A674 /* ISVideoFitToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ISVideoFitToolbar.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -345,6 +354,8 @@
 			children = (
 				E9AD14661A233C7300E44B4B /* ISVideo.h */,
 				E9AD14671A233C7300E44B4B /* ISVideo.m */,
+				E9AD4EF81A284CB300281D9E /* ISAudio.h */,
+				E9AD4EF91A284CB300281D9E /* ISAudio.m */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -352,6 +363,8 @@
 		E9AD13B41A22D7C700E44B4B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E9AD4EF01A28248E00281D9E /* ISAudioPickerPopupView.h */,
+				E9AD4EF11A28248E00281D9E /* ISAudioPickerPopupView.m */,
 				E925AAFF1A27191D00D53B1A /* ISAudioVolumePoupView.h */,
 				E925AB001A27191D00D53B1A /* ISAudioVolumePoupView.m */,
 				E9AD14501A230FCF00E44B4B /* ISMainToolbar.h */,
@@ -360,6 +373,8 @@
 				E9AD14571A2311D900E44B4B /* ISConfirmToolbar.m */,
 				E9AD14531A2311CA00E44B4B /* ISVideoTrimToolbar.h */,
 				E9AD145E1A23157400E44B4B /* ISVideoTrimToolbar.m */,
+				E9AD4EF31A28355700281D9E /* ISAudioTrimToolbar.h */,
+				E9AD4EF41A28355700281D9E /* ISAudioTrimToolbar.m */,
 				E9BEE3F31A24711D00A4A674 /* ISVideoFitToolbar.h */,
 				E9BEE3F41A24711D00A4A674 /* ISVideoFitToolbar.m */,
 				E9AD14601A23386000E44B4B /* ISColorPicker.h */,
@@ -379,6 +394,7 @@
 		E9AD13BD1A22D93100E44B4B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E9AD4EF61A28495B00281D9E /* slide_trim_bg@2x.png */,
 				E925AAFD1A27116C00D53B1A /* audio.mp3 */,
 				E9AD13BE1A22D93100E44B4B /* drawable-xhdpi */,
 				E9AD13FA1A22D93100E44B4B /* slider-metal-track.png */,
@@ -386,7 +402,6 @@
 				E9AD13FC1A22D93100E44B4B /* slider-metal-trackBackground.png */,
 				E9AD13FD1A22D93100E44B4B /* slider-metal-trackBackground@2x.png */,
 				E9AD144C1A22FBF300E44B4B /* Movie.m4v */,
-				E9AD144D1A22FBF300E44B4B /* slide_volume@2x.png */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -581,6 +596,7 @@
 				E9AD142D1A22D93100E44B4B /* icon_video.png in Resources */,
 				E9AD14311A22D93100E44B4B /* sign_new.png in Resources */,
 				E9AD14211A22D93100E44B4B /* icon_important_small.png in Resources */,
+				E9AD4EF71A28495B00281D9E /* slide_trim_bg@2x.png in Resources */,
 				E9AD141F1A22D93100E44B4B /* icon_full.png in Resources */,
 				E9AD140D1A22D93100E44B4B /* icon_apply.png in Resources */,
 				E9AD141D1A22D93100E44B4B /* icon_fittop.png in Resources */,
@@ -594,7 +610,6 @@
 				E9AD144E1A22FBF300E44B4B /* Movie.m4v in Resources */,
 				E9AD140E1A22D93100E44B4B /* icon_back.png in Resources */,
 				E9AD14051A22D93100E44B4B /* btn_dialog_pressed.9.png in Resources */,
-				E9AD144F1A22FBF300E44B4B /* slide_volume@2x.png in Resources */,
 				E9AD14021A22D93100E44B4B /* btn_blue.9.png in Resources */,
 				E9AD141E1A22D93100E44B4B /* icon_flip.png in Resources */,
 				E9AD14331A22D93100E44B4B /* slide_volume@2x.png in Resources */,
@@ -640,6 +655,8 @@
 				E9AD14781A2347C700E44B4B /* ISCommand.m in Sources */,
 				E9AD144B1A22E02700E44B4B /* ISVideoPlaybackView.m in Sources */,
 				E9AD13901A22D68F00E44B4B /* AppDelegate.m in Sources */,
+				E9AD4EF51A28355700281D9E /* ISAudioTrimToolbar.m in Sources */,
+				E9AD4EFA1A284CB300281D9E /* ISAudio.m in Sources */,
 				E9AD14621A23386000E44B4B /* ISColorPicker.m in Sources */,
 				E9AD14791A2347C700E44B4B /* ISRotateCommand.m in Sources */,
 				E925AB011A27191D00D53B1A /* ISAudioVolumePoupView.m in Sources */,
@@ -649,6 +666,7 @@
 				E9AD146B1A233CDE00E44B4B /* ISVideoManager.m in Sources */,
 				E9AD145B1A2311F400E44B4B /* NMRangeSlider.m in Sources */,
 				E9AD14471A22DDF200E44B4B /* ISVideoEditViewController.m in Sources */,
+				E9AD4EF21A28248E00281D9E /* ISAudioPickerPopupView.m in Sources */,
 				E9AD14651A23387800E44B4B /* ISScrollView.m in Sources */,
 				E9AD14411A22DAE100E44B4B /* ISHelper.m in Sources */,
 				E9AD13B81A22D80A00E44B4B /* ISMainViewController.m in Sources */,

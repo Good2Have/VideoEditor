@@ -14,13 +14,6 @@
 #define ISAUDIOVOLUMEPOPUPVIEW_LEFT_PADDING         20
 #define ISAUDIOVOLUMEPOPUPVIEW_INTERVAL_PADDING     10
 
-#define GDALERTVIEW_CONTENT_VIEW_WIDTH          280
-#define GDALERTVIEW_TEXT_VIEW_LEFT_PADDING      10
-#define GDALERTVIEW_TEXT_VIEW_TOP_PADDING       15
-#define GDALERTVIEW_BUTTON_HEIGHT               40
-#define GDALERTVIEW_TITLE_LABEL_HEIGHT          40
-#define GDALERTVIEW_SEPERATE_VIEW_HEIGHT        1
-
 @interface ISAudioVolumePoupView ()
 {
     UIView *bgView;
@@ -90,6 +83,9 @@
     
     videoVolumeSlider = [[UISlider alloc] initWithFrame:CGRectMake(videoImageView.frame.origin.x + videoImageView.frame.size.width + ISAUDIOVOLUMEPOPUPVIEW_INTERVAL_PADDING, videoImageView.frame.origin.y, contentView.frame.size.width - ISAUDIOVOLUMEPOPUPVIEW_INTERVAL_PADDING*2 - videoImageView.frame.origin.x - videoImageView.frame.size.width - ISAUDIOVOLUMEPOPUPVIEW_LEFT_PADDING, 20)];
     videoVolumeSlider.tag = 0;
+    videoVolumeSlider.minimumTrackTintColor = [UIColor colorWithRed:255.0/255.0 green:0.0/255.0 blue:87.0/255.0 alpha:1];
+    [videoVolumeSlider setThumbImage:[UIImage imageNamed:@"slide_volume"] forState:UIControlStateNormal];
+    [videoVolumeSlider setThumbTintColor:[UIColor colorWithRed:255.0/255.0 green:0.0/255.0 blue:87.0/255.0 alpha:1]];
     videoVolumeSlider.minimumValue = 0.f;
     videoVolumeSlider.maximumValue = 1.f;
     videoVolumeSlider.value = self.currentVideoVolume;
@@ -108,6 +104,9 @@
     
     musicVolumeSlider = [[UISlider alloc] initWithFrame:CGRectMake(musicImageView.frame.origin.x + musicImageView.frame.size.width + ISAUDIOVOLUMEPOPUPVIEW_INTERVAL_PADDING, musicImageView.frame.origin.y, contentView.frame.size.width - ISAUDIOVOLUMEPOPUPVIEW_INTERVAL_PADDING*2 - musicImageView.frame.origin.x - musicImageView.frame.size.width - ISAUDIOVOLUMEPOPUPVIEW_LEFT_PADDING, 20)];
     musicVolumeSlider.tag = 1;
+    musicVolumeSlider.minimumTrackTintColor = [UIColor colorWithRed:255.0/255.0 green:0.0/255.0 blue:87.0/255.0 alpha:1];
+    [musicVolumeSlider setThumbImage:[UIImage imageNamed:@"slide_volume"] forState:UIControlStateNormal];
+    [musicVolumeSlider setThumbTintColor:[UIColor colorWithRed:255.0/255.0 green:0.0/255.0 blue:87.0/255.0 alpha:1]];
     musicVolumeSlider.minimumValue = 0.f;
     musicVolumeSlider.maximumValue = 1.f;
     musicVolumeSlider.value = self.currentMusicVolume;
